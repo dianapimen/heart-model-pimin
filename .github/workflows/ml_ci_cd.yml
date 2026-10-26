@@ -1,45 +1,37 @@
-name: Modelops deploy
+name: ML Model CI/CD
 on:
-  push:
-    branches: [ master ]
-  pull_request:
-    branches: [ master ]
   repository_dispatch:
     types: [ml_ci_cd]
+
 jobs:
   ml_ci_cd:
     runs-on: ubuntu-latest
-    strategy:name: Modelops deploy
-on:
-  push:
-    branches: [ master ]
-  pull_request:
-    branches: [ master ]
-  repository_dispatch:
-    types: [ml_ci_cd]
-jobs:
-  ml_ci_cd:
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        python-version: [3.8]
     steps:
-    - uses: actions/checkout@v3
-    - name: Set up Python
-      uses: actions/setup-python@v4
-      with:
-          python-version: ${{ matrix.python-version }}
-    - name: list 
-      run: python --version
-
-
-      matrix:
-        python-version: [3.8]
-    steps:
-    - uses: actions/checkout@v3
-    - name: Set up Python
-      uses: actions/setup-python@v4
-      with:
-          python-version: ${{ matrix.python-version }}
-    - name: list 
-      run: python --version
+      - uses: actions/checkout@v2
+      
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+          
+      - name: Pip install
+        run: pip install -r requirements.txt
+        
+      - name: Download dataset
+        run: wget -O data/dataset.csv ${{github.event.client_payload.dataseturl}}
+        
+      - name: Train model
+        run: python train.py
+        
+      - name: Docker build
+        run: docker build -t ${{secrets.DOCKER_USER}}/${{secrets.MODEL_NAME}}:${{github.event.client_payload.sha}} .
+        
+      - name: Docker login
+        env:
+          DOCKER_USER: ${{secrets.DOCKER_USER}}
+          DOCKER_PASSWORD: ${{secrets.DOCKER_PASSWORD}}
+        run: |
+          docker login -u $DOCKER_USER -p $DOCKER_PASSWORD
+          
+      - name: Docker push
+        run: docker push ${{secrets.DOCKER_USER}}/${{secrets.MODEL_NAME}}:${{github.event.client_payload.sha}}
