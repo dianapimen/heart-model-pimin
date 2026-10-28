@@ -1,5 +1,7 @@
 from pathlib import Path
 import pandas as pd
+import os
+import uvicorn
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
@@ -12,11 +14,10 @@ MODEL_DIR = BASE_DIR / "model"
 FEATURES = ["Time"] + [f"V{i}" for i in range(1, 29)] + ["Amount"]
 
 # Diccionario para cargar dinámicamente los modelos según el dataset elegido
-# Asegúrate de que los nombres de los archivos correspondan con los que guardaste en la carpeta 'model'
 MODELOS = {
     "100": load(MODEL_DIR / "xgboost-fraud-v1.joblib"),
-    "50": load(MODEL_DIR / "xgboost-fraud-v50.joblib"),  # Ajusta el nombre si difiere
-    "25": load(MODEL_DIR / "xgboost-fraud-v25.joblib")   # Ajusta el nombre si difiere
+    "50": load(MODEL_DIR / "xgboost-fraud-v50.joblib"),
+    "25": load(MODEL_DIR / "xgboost-fraud-v25.joblib")
 }
 
 app = FastAPI(
@@ -96,3 +97,8 @@ def evaluar_transaccion(transaccion: Transaccion):
         "message": "Transacción Fraudulenta" if prediccion == 1 else "Transacción Legítima",
         "probability": round(probabilidad, 4)
     }
+
+# Esto permite que Render inyecte su puerto dinámico de manera correcta
+if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 10000))
+    uvicorn.run("app:app", host="0.0.0.0", port=port)
