@@ -101,8 +101,8 @@ def evaluar_transaccion(transaccion: Transaccion):
 @app.post("/retrain")
 def trigger_retrain():
     github_token = os.environ.get("GITHUB_TOKEN")
-    owner = "tu-usuario-de-github"  # Tu usuario real
-    repo = "tu-repo-del-backend"    # Tu repo real del backend
+    owner = "dianapimen"  # Tu usuario real
+    repo = "heart-model-pimin"    # Tu repo real del backend
     
     url = f"https://api.github.com/repos/{owner}/{repo}/dispatches"
     
