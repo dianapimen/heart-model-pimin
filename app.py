@@ -2,6 +2,7 @@ from pathlib import Path
 import pandas as pd
 import os
 import uvicorn
+import requests
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
@@ -97,6 +98,30 @@ def evaluar_transaccion(transaccion: Transaccion):
         "message": "Transacción Fraudulenta" if prediccion == 1 else "Transacción Legítima",
         "probability": round(probabilidad, 4)
     }
+@app.post("/retrain")
+def trigger_retrain():
+    github_token = os.environ.get("GITHUB_TOKEN")
+    owner = "tu-usuario-github"  # Cambia por tu usuario o entidad de GitHub
+    repo = "tu-repo-backend"     # Cambia por el nombre de tu repositorio del backend
+    
+    url = f"https://api.github.com/repos/{owner}/{repo}/dispatches"
+    
+    headers = {
+        "Authorization": f"Bearer {github_token}",
+        "Accept": "application/vnd.github+json",
+        "X-GitHub-Api-Version": "2022-11-28"
+    }
+    
+    payload = {
+        "event_type": "retrain-model" # Debe coincidir con el tipo configurado en tu GitHub Action
+    }
+    
+    response = requests.post(url, json=payload, headers=headers)
+    
+    if response.status_code == 204:
+        return {"status": "success", "message": "Reentrenamiento iniciado en GitHub Actions"}
+    else:
+        raise HTTPException(status_code=500, detail="Error al disparar el workflow en GitHub")
 
 # Esto permite que Render inyecte su puerto dinámico de manera correcta
 if __name__ == "__main__":
