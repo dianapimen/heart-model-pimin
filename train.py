@@ -1,12 +1,13 @@
-import pandas as pd
 from pathlib import Path
+import pandas as pd
 from joblib import dump
 from xgboost import XGBClassifier
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import classification_report, confusion_matrix
 
 BASE_DIR = Path(__file__).resolve().parent
-DATA_PATH = BASE_DIR / "creditcard.csv"
+# Apuntamos a la carpeta data/ que crea GitHub Actions al descargar el dataset
+DATA_PATH = BASE_DIR / "data" / "creditcard.csv"
 MODEL_DIR = BASE_DIR / "model"
 MODEL_PATH = MODEL_DIR / "xgboost-fraud-v1.joblib"
 
