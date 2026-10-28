@@ -1,37 +1,41 @@
-name: ML Model CI/CD
+name: ML heart-model
+
 on:
+  push:
+    branches: [ master ]
   repository_dispatch:
     types: [ml_ci_cd]
 
 jobs:
   ml_ci_cd:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.10'
-          
-      - name: Pip install
-        run: pip install -r requirements.txt
-        
-      - name: Download dataset
-        run: wget -O creditcard.csv ${{github.event.client_payload.dataseturl}}
-        
-      - name: Train model
-        run: python train.py
-        
-      - name: Docker build
-        run: docker build -t ${{secrets.DOCKER_USER}}/${{secrets.MODEL_NAME}}:${{github.event.client_payload.sha}} .
-        
-      - name: Docker login
-        env:
-          DOCKER_USER: ${{secrets.DOCKER_USER}}
-          DOCKER_PASSWORD: ${{secrets.DOCKER_PASSWORD}}
-        run: |
-          docker login -u $DOCKER_USER -p $DOCKER_PASSWORD
-          
-      - name: Docker push
-        run: docker push ${{secrets.DOCKER_USER}}/${{secrets.MODEL_NAME}}:${{github.event.client_payload.sha}}
+     runs-on: ubuntu-latest
+     steps:
+       - uses: actions/checkout@v3
+
+       - name: Set up Python
+         uses: actions/setup-python@v4
+         with:
+           python-version: '3.10'
+
+       - name: Install dependencies
+         run: pip install -r requirements.txt
+
+       - name: Download dataset
+         run: |
+           mkdir -p data
+           wget -O data/creditcard.csv "${{ github.event.client_payload.dataseturl }}"
+
+       - name: Train model
+         run: python model/train.py
+
+       - name: Docker login
+         uses: docker/login-action@v2
+         with:
+           username: ${{ secrets.DOCKER_USER }}
+           password: ${{ secrets.DOCKER_PASSWORD }}
+
+       - name: Build and push Docker image
+         run: |
+           TAG="${{ github.event.client_payload.sha }}"
+           docker build -t ${{ secrets.DOCKER_USER }}/${{ secrets.MODEL_NAME }}:$TAG .
+           docker push ${{ secrets.DOCKER_USER }}/${{ secrets.MODEL_NAME }}:$TAG
