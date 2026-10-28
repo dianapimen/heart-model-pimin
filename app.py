@@ -6,30 +6,36 @@ from pydantic import BaseModel
 from joblib import load
 
 BASE_DIR = Path(__file__).resolve().parent
-MODEL_PATH = BASE_DIR / "model" / "xgboost-fraud-v1.joblib"
+MODEL_DIR = BASE_DIR / "model"
 
 # 30 features que espera tu modelo XGBoost
 FEATURES = ["Time"] + [f"V{i}" for i in range(1, 29)] + ["Amount"]
 
-modelo = load(MODEL_PATH)
+# Diccionario para cargar dinámicamente los modelos según el dataset elegido
+# Asegúrate de que los nombres de los archivos correspondan con los que guardaste en la carpeta 'model'
+MODELOS = {
+    "100": load(MODEL_DIR / "xgboost-fraud-v1.joblib"),
+    "50": load(MODEL_DIR / "xgboost-fraud-v50.joblib"),  # Ajusta el nombre si difiere
+    "25": load(MODEL_DIR / "xgboost-fraud-v25.joblib")   # Ajusta el nombre si difiere
+}
 
 app = FastAPI(
     title="API de detección de fraude",
-    description="Predicción de transacciones fraudulentas mediante XGBoost",
+    description="Predicción de transacciones fraudulentas mediante XGBoost con múltiples datasets",
     version="1.0.0"
 )
 
-# 1. HABILITAR CORS (Soluciona el bloqueo del navegador)
+# Habilitar CORS para permitir peticiones desde Angular (local y producción)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Permite peticiones desde cualquier origen (Angular local o producción)
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
 class Transaccion(BaseModel):
-    dataset: str = "100"  # Opcional, para recibir la versión elegida
+    dataset: str = "100"  # Recibe la versión elegida desde el frontend ('100', '50', '25')
     Time: float
     V1: float
     V2: float
@@ -67,19 +73,21 @@ def inicio():
     return {"mensaje": "API de detección de fraude activa"}
 
 
-@app.post("/predict")  # Cambiado de /score a /predict para coincidir con Angular
+@app.post("/predict")
 def evaluar_transaccion(transaccion: Transaccion):
-    # Convertimos a diccionario y removemos 'dataset' para que Pandas no falle al pasar las 30 features al modelo
     datos = transaccion.model_dump()
+    
+    # Extraemos la versión del dataset enviada por Angular (por defecto "100")
     dataset_version = datos.pop("dataset", "100")
     
-    # Aquí podrías cargar dinámicamente el modelo según dataset_version si lo deseas, 
-    # por ahora usará el modelo principal cargado.
+    # Seleccionamos el modelo dinámicamente; si la versión no existe, usa el del 100% por seguridad
+    modelo_activo = MODELOS.get(dataset_version, MODELOS["100"])
     
+    # Creamos el DataFrame con las 30 características exactas para XGBoost
     X = pd.DataFrame([datos], columns=FEATURES)
 
-    probabilidad = float(modelo.predict_proba(X)[0, 1])
-    prediccion = int(modelo.predict(X)[0])
+    probabilidad = float(modelo_activo.predict_proba(X)[0, 1])
+    prediccion = int(modelo_activo.predict(X)[0])
 
     return {
         "dataset_usado": dataset_version,
