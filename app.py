@@ -101,8 +101,8 @@ def evaluar_transaccion(transaccion: Transaccion):
 @app.post("/retrain")
 def trigger_retrain():
     github_token = os.environ.get("GITHUB_TOKEN")
-    owner = "tu-usuario-github"  # Cambia por tu usuario o entidad de GitHub
-    repo = "tu-repo-backend"     # Cambia por el nombre de tu repositorio del backend
+    owner = "dianapimen"
+    repo = "heart-model-pimin"
     
     url = f"https://api.github.com/repos/{owner}/{repo}/dispatches"
     
@@ -123,7 +123,6 @@ def trigger_retrain():
     else:
         raise HTTPException(status_code=500, detail="Error al disparar el workflow en GitHub")
 
-# Esto permite que Render inyecte su puerto dinámico de manera correcta
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 10000))
     uvicorn.run("app:app", host="0.0.0.0", port=port)
