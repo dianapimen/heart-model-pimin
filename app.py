@@ -101,8 +101,8 @@ def evaluar_transaccion(transaccion: Transaccion):
 @app.post("/retrain")
 def trigger_retrain():
     github_token = os.environ.get("GITHUB_TOKEN")
-    owner = "dianapimen"
-    repo = "heart-model-pimin"
+    owner = "tu-usuario-de-github"  # Tu usuario real
+    repo = "tu-repo-del-backend"    # Tu repo real del backend
     
     url = f"https://api.github.com/repos/{owner}/{repo}/dispatches"
     
@@ -113,16 +113,22 @@ def trigger_retrain():
     }
     
     payload = {
-        "event_type": "retrain-model" # Debe coincidir con el tipo configurado en tu GitHub Action
+        "event_type": "retrain-model"
     }
     
     response = requests.post(url, json=payload, headers=headers)
     
+    # NUEVO: Imprimir en los logs de Render lo que responde GitHub
+    print(f"STATUS CODE DE GITHUB: {response.status_code}")
+    print(f"RESPUESTA DE GITHUB: {response.text}")
+    
     if response.status_code == 204:
-        return {"status": "success", "message": "Reentrenamiento iniciado en GitHub Actions"}
+        return {"status": "success", "message": "Reentrenamiento iniciado"}
     else:
-        raise HTTPException(status_code=500, detail="Error al disparar el workflow en GitHub")
-
+        raise HTTPException(
+            status_code=500, 
+            detail=f"Error de GitHub ({response.status_code}): {response.text}"
+        )
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 10000))
     uvicorn.run("app:app", host="0.0.0.0", port=port)
