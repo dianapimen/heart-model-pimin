@@ -5,9 +5,8 @@ from xgboost import XGBClassifier
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import classification_report, confusion_matrix
 
-# Rutas del proyecto
 BASE_DIR = Path(__file__).resolve().parent
-DATA_PATH = BASE_DIR.parent / "creditcard.csv"
+DATA_PATH = BASE_DIR / "creditcard.csv"
 MODEL_DIR = BASE_DIR / "model"
 MODEL_PATH = MODEL_DIR / "xgboost-fraud-v1.joblib"
 
