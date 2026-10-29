@@ -1,0 +1,19 @@
+
+# Archivos de Python
+__pycache__/
+*.py[cod]
+
+# Entornos virtuales
+venv/
+.venv/
+entorno/
+
+# Datasets: no subir archivos CSV
+*.csv
+
+# Variables y credenciales
+.env
+.env.*
+
+# Archivos del sistema
+.DS_Store
