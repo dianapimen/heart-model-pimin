@@ -114,9 +114,12 @@ def trigger_retrain():
         "X-GitHub-Api-Version": "2022-11-28"
     }
     
-    payload = {
-        "event_type": "ml_ci_cd"
+                                                                                                            payload = {
+    "event_type": "ml_ci_cd",
+    "client_payload": {
+        "dataseturl": "https://huggingface.co/datasets/dianizz/CreditCard/resolve/main/creditcard_100.csv"
     }
+}
     
     response = requests.post(url, json=payload, headers=headers)
     
