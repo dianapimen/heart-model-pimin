@@ -114,12 +114,14 @@ def trigger_retrain():
         "X-GitHub-Api-Version": "2022-11-28"
     }
     
-                                                                                                            payload = {
+    payload = {
     "event_type": "ml_ci_cd",
-    "client_payload": {
-        "dataseturl": "https://huggingface.co/datasets/dianizz/CreditCard/resolve/main/creditcard_100.csv"
+        "client_payload": {
+            "dataseturl": "https://huggingface.co/datasets/dianizz/CreditCard/resolve/main/creditcard_100.csv?download=true",
+            "sha": "latest" # (Y asegúrate de enviar también el sha si tu docker build lo usa)
+        }
     }
-}
+
     
     response = requests.post(url, json=payload, headers=headers)
     
