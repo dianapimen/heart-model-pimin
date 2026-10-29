@@ -115,7 +115,7 @@ def trigger_retrain():
     }
     
     payload = {
-        "event_type": "retrain-model"
+        "event_type": "ml_ci_cd"
     }
     
     response = requests.post(url, json=payload, headers=headers)
