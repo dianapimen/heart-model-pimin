@@ -3,7 +3,7 @@ import pandas as pd
 import os
 import uvicorn
 import requests
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from joblib import load
@@ -98,6 +98,8 @@ def evaluar_transaccion(transaccion: Transaccion):
         "message": "Transacción Fraudulenta" if prediccion == 1 else "Transacción Legítima",
         "probability": round(probabilidad, 4)
     }
+
+
 @app.post("/retrain")
 def trigger_retrain():
     github_token = os.environ.get("GITHUB_TOKEN")
@@ -118,7 +120,7 @@ def trigger_retrain():
     
     response = requests.post(url, json=payload, headers=headers)
     
-    # NUEVO: Imprimir en los logs de Render lo que responde GitHub
+    # Imprimir en los logs de Render lo que responde GitHub
     print(f"STATUS CODE DE GITHUB: {response.status_code}")
     print(f"RESPUESTA DE GITHUB: {response.text}")
     
@@ -129,6 +131,8 @@ def trigger_retrain():
             status_code=500, 
             detail=f"Error de GitHub ({response.status_code}): {response.text}"
         )
+
+
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 10000))
     uvicorn.run("app:app", host="0.0.0.0", port=port)
