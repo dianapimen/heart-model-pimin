@@ -36,6 +36,6 @@ jobs:
 
       - name: Build and push Docker image
         run: |
-          TAG="${{ github.event.client_payload.sha }}"
+          TAG="latest"
           docker build -t ${{ secrets.DOCKER_USER }}/${{ secrets.MODEL_NAME }}:$TAG .
           docker push ${{ secrets.DOCKER_USER }}/${{ secrets.MODEL_NAME }}:$TAG
