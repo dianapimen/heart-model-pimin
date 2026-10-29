@@ -23,7 +23,7 @@ jobs:
       - name: Download dataset from Hugging Face
         run: |
           mkdir -p data
-          wget -O data/creditcard.csv "${{ github.event.client_payload.dataseturl }}"
+          wget -O data/creditcard.csv "https://huggingface.co/datasets/dianizz/CreditCard/resolve/main/creditcard_100.csv"
 
       - name: Train model
         run: python train.py
