@@ -106,7 +106,9 @@ def evaluar_transaccion(transaccion: Transaccion):
 
     probabilidad = float(modelo_activo.predict_proba(X)[0, 1])
     prediccion = int(modelo_activo.predict(X)[0])
-    
+
+    # Multiplicamos por 100 para mostrar el porcentaje real y redondeamos a 4 decimales
+    porcentaje_fraude = round(probabilidad * 100, 4)
     # --- AGREGA ESTO TEMPORALMENTE ---
     print(f"VALOR CRUDO DE PROBABILIDAD: {probabilidad}")
     print(f"VECTOR ENVIADO AL MODELO: {datos}")
@@ -117,7 +119,7 @@ def evaluar_transaccion(transaccion: Transaccion):
         "prediccion": prediccion,
         "is_fraud": bool(prediccion == 1),
         "message": "Transacción Fraudulenta" if prediccion == 1 else "Transacción Legítima",
-        "probability": round(probabilidad, 4)
+        "probability": porcentaje_fraude
     }
 
 
