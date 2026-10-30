@@ -82,9 +82,25 @@ def evaluar_transaccion(transaccion: Transaccion):
     # Extraemos la versión del dataset enviada por Angular (por defecto "100")
     dataset_version = datos.pop("dataset", "100")
     
-    # Seleccionamos el modelo dinámicamente; si la versión no existe, usa el del 100% por seguridad
+    # Seleccionamos el modelo dinámicamente
     modelo_activo = MODELOS.get(dataset_version, MODELOS["100"])
     
+    # --- SOLUCIÓN RÁPIDA: Rellenar variables faltantes (que llegan en 0) ---
+    # Si Time o las variables de la V5 a la V28 llegan en 0, 
+    # les asignamos un valor base representativo para evitar el colapso del modelo.
+    valores_base = {
+        "Time": 40000.0, # Valor promedio aproximado de tiempo en segundos
+    }
+    # Rellenar V5 a V28 con un valor por defecto cercano a la media normal
+    for i in range(5, 29):
+        valores_base[f"V{i}"] = 0.05 
+
+    for k, val_defecto in valores_base.items():
+        # Si el campo no viene o viene en 0, usamos el valor base
+        if datos.get(k, 0) == 0:
+            datos[k] = val_defecto
+    # ---------------------------------------------------------------------
+
     # Creamos el DataFrame con las 30 características exactas para XGBoost
     X = pd.DataFrame([datos], columns=FEATURES)
 
