@@ -106,6 +106,11 @@ def evaluar_transaccion(transaccion: Transaccion):
 
     probabilidad = float(modelo_activo.predict_proba(X)[0, 1])
     prediccion = int(modelo_activo.predict(X)[0])
+    
+    # --- AGREGA ESTO TEMPORALMENTE ---
+    print(f"VALOR CRUDO DE PROBABILIDAD: {probabilidad}")
+    print(f"VECTOR ENVIADO AL MODELO: {datos}")
+    # ---------------------------------
 
     return {
         "dataset_usado": dataset_version,
