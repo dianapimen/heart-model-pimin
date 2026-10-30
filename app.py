@@ -108,7 +108,7 @@ def evaluar_transaccion(transaccion: Transaccion):
     prediccion = int(modelo_activo.predict(X)[0])
 
     # Multiplicamos por 100 para mostrar el porcentaje real y redondeamos a 4 decimales
-    porcentaje_fraude = round(probabilidad * 100, 4)
+    porcentaje_fraude = round(probabilidad * 100, 6)
     # --- AGREGA ESTO TEMPORALMENTE ---
     print(f"VALOR CRUDO DE PROBABILIDAD: {probabilidad}")
     print(f"VECTOR ENVIADO AL MODELO: {datos}")
